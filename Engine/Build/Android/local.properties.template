@@ -1,0 +1,48 @@
+# Unreal Engine 4 Lite - Local Build Properties Template
+# Copy this file to local.properties and configure for your environment
+
+# Android SDK and NDK Paths
+sdk.dir=/path/to/Android/Sdk
+ndk.dir=/path/to/Android/Sdk/ndk/r19c
+ndk.version=19.2.5345600
+
+# Java Configuration
+java.source=11
+java.target=11
+
+# Gradle Settings
+gradle.version=6.8
+org.gradle.parallel=true
+org.gradle.workers.max=8
+org.gradle.jvmargs=-Xmx4096m
+org.gradle.caching=true
+
+# Android Build Configuration
+android.useAndroidX=true
+android.enableJetifier=true
+android.enableR8=true
+android.enableD8=true
+
+# Unreal Engine 4 Lite Configuration
+ue4.min.api=21
+ue4.target.api=30
+ue4.lite.mode=true
+ue4.enable.mobile.rendering=true
+ue4.optimize.shaders=true
+ue4.optimize.textures=true
+ue4.optimize.audio=true
+ue4.strip.symbols=true
+ue4.compress.apk=true
+
+# Build Output
+build.output.dir=Build/Output/Android
+
+# Optimization Flags
+optimize.memory=true
+optimize.cpu=true
+optimize.gpu=true
+optimize.battery=true
+
+# Debug Settings (set to false for production)
+debug.logging=false
+debug.profiling=false
