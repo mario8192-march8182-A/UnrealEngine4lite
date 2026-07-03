@@ -1,0 +1,136 @@
+// Unreal Engine 4 Lite - Mobile Optimized Shader Library
+// Simplified shaders for Android devices with limited GPU resources
+
+#pragma once
+
+#include "Common.ush"
+
+// ============================================================
+// LITE SHADER MODES - Simplified rendering pipeline
+// ============================================================
+
+// Basic unlit shader - no dynamic lighting calculation
+void LiteUnlitShader(
+    in float3 WorldPos,
+    in float3 WorldNormal,
+    in float2 TexCoord,
+    in float4 VertexColor,
+    out float4 OutColor
+)
+{
+    // Direct texture sampling with minimal overhead
+    float4 BaseColor = Texture2DSample(BaseColorTexture, BaseColorSampler, TexCoord);
+    
+    // Apply vertex color modulation
+    OutColor = BaseColor * VertexColor;
+    
+    // Simple ambient lighting
+    float3 AmbientLight = float3(0.5, 0.5, 0.5);
+    OutColor.rgb *= AmbientLight;
+}
+
+// Low-poly shader - simplified normal mapping
+void LiteLowPolyShader(
+    in float3 WorldPos,
+    in float3 WorldNormal,
+    in float2 TexCoord,
+    in float3 LightDir,
+    out float4 OutColor
+)
+{
+    // Simple diffuse lighting
+    float3 BaseColor = Texture2DSample(BaseColorTexture, BaseColorSampler, TexCoord).rgb;
+    
+    // Single directional light only
+    float NdotL = max(dot(normalize(WorldNormal), normalize(LightDir)), 0.0);
+    float3 DiffuseLight = float3(1.0, 1.0, 1.0) * NdotL;
+    
+    OutColor = float4(BaseColor * DiffuseLight, 1.0);
+}
+
+// 2D Canvas shader - for UI and 2D elements
+void Lite2DCanvasShader(
+    in float2 ScreenPos,
+    in float2 TexCoord,
+    in float4 VertexColor,
+    out float4 OutColor
+)
+{
+    // Direct texture lookup with minimal processing
+    float4 TexColor = Texture2DSample(CanvasTexture, CanvasSampler, TexCoord);
+    OutColor = TexColor * VertexColor;
+}
+
+// ============================================================
+// TEXTURE PACKING UTILITIES - Support for 5-sampler limit
+// ============================================================
+
+// Pack normal map data into single texture
+void UnpackLiteNormals(
+    in float4 PackedNormal,
+    out float3 OutNormal
+)
+{
+    // BC5 or ETC2 compressed format support
+    OutNormal.xy = PackedNormal.xy * 2.0 - 1.0;
+    OutNormal.z = sqrt(max(1.0 - dot(OutNormal.xy, OutNormal.xy), 0.0));
+}
+
+// Pack roughness + metallic into single channel
+void UnpackLiteRoughnessMetallic(
+    in float PackedValue,
+    out float OutRoughness,
+    out float OutMetallic
+)
+{
+    OutRoughness = fmod(PackedValue * 255.0, 16.0) / 15.0;
+    OutMetallic = floor(PackedValue * 255.0 / 16.0) / 15.0;
+}
+
+// ============================================================
+// MOBILE OPTIMIZATION DIRECTIVES
+// ============================================================
+
+// Disable expensive features
+#define DISABLE_ATMOSPHERIC_FOG 1
+#define DISABLE_SKY_ATMOSPHERE 1
+#define DISABLE_WHOLE_SCENE_SHADOWS 1
+#define DISABLE_STATIONARY_SKYLIGHT 1
+
+// Enable mobile-specific optimizations
+#define ENABLE_MOBILE_DEFERRED 0      // Use forward rendering
+#define ENABLE_EARLY_Z_PASS 1         // Depth prepass optimization
+#define ENABLE_CONSERVATIVE_RASTERIZATION 0
+
+// Texture sampler limits for mobile
+#define MAX_SAMPLERS 5
+#define SAMPLER_SLOT_BASE_COLOR 0
+#define SAMPLER_SLOT_NORMAL 1
+#define SAMPLER_SLOT_ARM 2            // Ambient Occlusion, Roughness, Metallic
+#define SAMPLER_SLOT_EMISSIVE 3
+#define SAMPLER_SLOT_DETAIL 4
+
+// ============================================================
+// PERFORMANCE MONITORING
+// ============================================================
+
+// Debug visualization for optimization
+void DebugVisualize(
+    in float4 BaseColor,
+    in float PixelShaderCost,
+    out float4 OutColor
+)
+{
+#if ENABLE_DEBUG_VISUALIZATION
+    // Visualize pixel shader complexity
+    if (PixelShaderCost > 0.8)
+        OutColor = float4(1.0, 0.0, 0.0, 1.0); // Red = expensive
+    else if (PixelShaderCost > 0.5)
+        OutColor = float4(1.0, 1.0, 0.0, 1.0); // Yellow = moderate
+    else
+        OutColor = float4(0.0, 1.0, 0.0, 1.0); // Green = optimal
+#else
+    OutColor = BaseColor;
+#endif
+}
+
