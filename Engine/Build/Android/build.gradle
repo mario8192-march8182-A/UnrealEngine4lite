@@ -1,0 +1,145 @@
+// Unreal Engine 4 Lite - Android Gradle Build Configuration
+// Optimized for lightweight mobile builds
+
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 30
+    buildToolsVersion "30.0.3"
+    
+    // Default config for UE4 Lite
+    defaultConfig {
+        applicationId "com.unrealengine.lite"
+        minSdkVersion 21
+        targetSdkVersion 30
+        versionCode 1
+        versionName "4.22-lite"
+        
+        // NDK build configuration
+        ndk {
+            abiFilters 'armeabi-v7a', 'arm64-v8a'
+            debugSymbolLevel 'full'
+        }
+        
+        // Optimization flags
+        manifestPlaceholders = [
+            'ue4LiteMode': 'true',
+            'minimumRam': '512MB',
+            'targetRam': '2GB'
+        ]
+    }
+    
+    // Build types for optimization
+    buildTypes {
+        debug {
+            debuggable true
+            minifyEnabled false
+            jniDebuggable true
+            
+            packagingOptions {
+                exclude 'lib/**/*.so'  // Will be handled by NDK
+            }
+        }
+        
+        release {
+            debuggable false
+            minifyEnabled true
+            shrinkResources true
+            
+            // R8 code shrinking (modern replacement for ProGuard)
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            
+            // Enable resource compression
+            packagingOptions {
+                exclude 'META-INF/proguard/androidx-*.pro'
+                exclude 'META-INF/services/**'
+            }
+            
+            signingConfig signingConfigs.release
+        }
+    }
+    
+    // Signing configuration (configure before release)
+    signingConfigs {
+        release {
+            storeFile file(System.getenv('KEYSTORE_PATH') ?: 'release.keystore')
+            storePassword System.getenv('KEYSTORE_PASSWORD') ?: ''
+            keyAlias System.getenv('KEY_ALIAS') ?: ''
+            keyPassword System.getenv('KEY_PASSWORD') ?: ''
+        }
+    }
+    
+    // Lint options - ignore non-critical warnings
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+        disable 'MissingTranslation', 'ExtraTranslation', 'MissingDimensionality'
+    }
+    
+    // Split APK by ABI for smaller downloads
+    splits {
+        abi {
+            enable true
+            reset()
+            include 'armeabi-v7a', 'arm64-v8a'
+            universalApk true
+        }
+    }
+    
+    // Namespace configuration (Android Gradle Plugin 7.1+)
+    namespace 'com.unrealengine.lite'
+}
+
+dependencies {
+    // Minimal dependencies for lightweight engine
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
+    
+    // Performance monitoring (optional)
+    implementation 'androidx.lifecycle:lifecycle-runtime:2.3.1'
+}
+
+// Custom tasks for optimization
+task optimizeShaders {
+    description 'Optimize shaders for mobile rendering'
+    doLast {
+        println 'Optimizing shaders for mobile...'
+        // Shader optimization logic here
+    }
+}
+
+task compressAssets {
+    description 'Compress textures and audio for mobile'
+    doLast {
+        println 'Compressing assets for mobile distribution...'
+        // Asset compression logic here
+    }
+}
+
+task buildLiteApk {
+    description 'Build optimized Lite APK for mobile'
+    dependsOn 'optimizeShaders', 'compressAssets', 'assembleRelease'
+    doLast {
+        println 'Lite APK build complete!'
+    }
+}
+
+// Print build summary
+gradle.taskGraph.whenReady { taskGraph ->
+    if (taskGraph.hasTask(tasks.named('assembleRelease'))) {
+        println """
+        ╔════════════════════════════════════════════╗
+        ║   Unreal Engine 4 Lite - Android Build     ║
+        ╚════════════════════════════════════════════╝
+        
+        Configuration:
+        - Min API Level: 21 (Android 5.0)
+        - Target API Level: 30 (Android 11)
+        - ABIs: armeabi-v7a, arm64-v8a
+        - Optimization: Full (R8, resource shrinking)
+        - Universal APK: Enabled
+        
+        Output: build/outputs/apk/release/
+        """
+    }
+}
