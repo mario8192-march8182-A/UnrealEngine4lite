@@ -1,136 +1,385 @@
-Unreal Engine
-=============
+# Unreal Engine 4 Lite - Android Build System
 
-Welcome to the Unreal Engine source code! 
+## 📱 Visão Geral
 
-From this repository you can build the Unreal Editor for Windows, Mac and Linux, compile Unreal Engine games for Android, iOS, PlayStation 4, Xbox One and HTML5,
-and build tools like Unreal Lightmass and Unreal Frontend. Modify them in any way you can imagine, and share your changes with others! 
+Este repositório contém uma versão otimizada da Unreal Engine 4 especificamente configurada para compilar e executar em dispositivos Android de entrada (512MB-2GB RAM).
 
-We have a heap of documentation available for the engine on the web. If you're looking for the answer to something, you may want to start here: 
+### ✨ Características Principais
 
-* [Unreal Engine Programming Guide](https://docs.unrealengine.com/latest/INT/Programming/index.html)
-* [Unreal Engine API Reference](https://docs.unrealengine.com/latest/INT/API/index.html)
-* [Engine source and GitHub on the Unreal Engine forums](https://forums.unrealengine.com/forumdisplay.php?1-Development-Discussion)
+- **Build System Android**: Scripts completos para NDK, SDK e Gradle
+- **Shaders Otimizados**: Apenas shaders essenciais (Unlit, Low Poly, 2D)
+- **Renderer Simplificado**: Forward rendering sem efeitos caros
+- **Otimização de Assets**: Compressão de texturas e áudio
+- **APK Leve**: Alvo < 100MB (compressed)
+- **Plugins Reduzidos**: Remove VR/AR e sistemas complexos
 
-If you need more, just ask! A lot of Epic developers hang out on the [forums](https://forums.unrealengine.com/) or [AnswerHub](https://answers.unrealengine.com/), 
-and we're proud to be part of a well-meaning, friendly and welcoming community of thousands. 
+---
 
+## 🚀 Quick Start
 
-Branches
---------
+### 1. Clonar e Setup Inicial
 
-We publish source for the engine in several branches:
+```bash
+# Clone o repositório
+git clone https://github.com/mario8192-march8182-A/UnrealEngine4lite.git
+cd UnrealEngine4lite
 
-The **[release branch](https://github.com/EpicGames/UnrealEngine/tree/release)** is extensively tested by our QA team and makes a great starting point for learning the engine or
-making your own games. We work hard to make releases stable and reliable, and aim to publish new releases every few months.
+# Checkout na branch de desenvolvimento
+git checkout android-lite-setup
 
-The **[promoted branch](https://github.com/EpicGames/UnrealEngine/tree/promoted)** is updated with builds for our artists and designers to use. We try to update with merges from the master branch daily (though we often catch things that prevent us from doing so) and it's a good balance between getting the latest cool stuff and knowing most things work.
+# Download binários
+./Setup.sh
 
-The **[master branch](https://github.com/EpicGames/UnrealEngine/tree/master)** is the hub of changes from all our specialized engine development teams. Our internal game teams typically take engine snapshots from here, but it isn't subject to as much testing as release branches.
+# Gerar arquivos de projeto
+./GenerateProjectFiles.sh
+```
 
-Individual teams have their own **development branches** for day to day work ([dev-core](https://github.com/EpicGames/UnrealEngine/tree/dev-core), [dev-mobile](https://github.com/EpicGames/UnrealEngine/tree/dev-mobile) and [dev-sequencer](https://github.com/EpicGames/UnrealEngine/tree/dev-sequencer), for example). These branches reflect the cutting edge of the engine and may be buggy - they may not even compile. Battle-hardened developers eager to test new features or work lock-step with us should head to one of these. We aim to merge development branches to master every 3-4 weeks.
+### 2. Configurar Android Build
 
-Other short-lived branches may pop-up from time to time as we stabilize new releases or hotfixes.
+```bash
+cd Engine/Build/Android
+chmod +x *.sh
 
+# Setup Android NDK/SDK/Gradle
+./setup-android.sh
 
-Getting up and running
-----------------------
+# Configurar local.properties
+cp local.properties.template local.properties
+# Editar local.properties com seus caminhos
+```
 
-The steps below will take you through cloning your own private fork, then compiling and running the editor yourself:
+### 3. Otimizar Engine
 
-### Windows
+```bash
+# Desabilitar shaders pesados
+./disable-expensive-shaders.sh
 
-1. Install **[GitHub for Windows](https://windows.github.com/)** then **[fork and clone our repository](https://guides.github.com/activities/forking/)**. 
-   To use Git from the command line, see the [Setting up Git](https://help.github.com/articles/set-up-git/) and [Fork a Repo](https://help.github.com/articles/fork-a-repo/) articles.
+# Remover plugins desnecessários
+./remove-unnecessary-plugins.sh
 
-   If you'd prefer not to use Git, you can get the source with the 'Download ZIP' button on the right. The built-in Windows zip utility will mark the contents of zip files 
-   downloaded from the Internet as unsafe to execute, so right-click the zip file and select 'Properties...' and 'Unblock' before decompressing it. Third-party zip utilities don't normally do this.
+# Configurar compilação de shaders
+python3 ../../Scripts/configure-shader-compiler.py ../../..
+```
 
-1. Install **Visual Studio 2017**. 
-   All desktop editions of Visual Studio 2017 can build UE4, including [Visual Studio Community 2017](http://www.visualstudio.com/products/visual-studio-community-vs), which is free for small teams and individual developers.
-   To install the correct components for UE4 development, check the "Game Development with C++" workload, and the "Unreal Engine Installer" and "Nuget Package Manager" optional components.
-  
-1. Open your source folder in Explorer and run **Setup.bat**. 
-   This will download binary content for the engine, as well as installing prerequisites and setting up Unreal file associations. 
-   On Windows 8, a warning from SmartScreen may appear.  Click "More info", then "Run anyway" to continue.
-   
-   A clean download of the engine binaries is currently 3-4gb, which may take some time to complete.
-   Subsequent checkouts only require incremental downloads and will be much quicker.
- 
-1. Run **GenerateProjectFiles.bat** to create project files for the engine. It should take less than a minute to complete.  
+### 4. Otimizar Assets
 
-1. Load the project into Visual Studio by double-clicking on the **UE4.sln** file. Set your solution configuration to **Development Editor** and your solution
-   platform to **Win64**, then right click on the **UE4** target and select **Build**. It may take anywhere between 10 and 40 minutes to finish compiling, depending on your system specs.
+```bash
+# Otimizar texturas, meshes e áudio
+python3 Scripts/optimize-assets.py <source_dir> <output_dir>
+```
 
-1. After compiling finishes, you can load the editor from Visual Studio by setting your startup project to **UE4** and pressing **F5** to debug.
+### 5. Build APK
 
+```bash
+# Source do ambiente
+source Engine/Build/Android/android-env.sh
 
+# Build release APK
+Engine/Build/Android/build-apk.sh release arm64-v8a
 
+# APK gerado em: Build/Output/Android/
+```
 
-### Mac
-   
-1. Install **[GitHub for Mac](https://mac.github.com/)** then **[fork and clone our repository](https://guides.github.com/activities/forking/)**. 
-   To use Git from the Terminal, see the [Setting up Git](https://help.github.com/articles/set-up-git/) and [Fork a Repo](https://help.github.com/articles/fork-a-repo/) articles.
-   If you'd rather not use Git, use the 'Download ZIP' button on the right to get the source directly.
+### 6. Deploy e Teste
 
-1. Install the latest version of [Xcode](https://itunes.apple.com/us/app/xcode/id497799835).
+```bash
+# Instalar no dispositivo
+adb install Build/Output/Android/app-release.apk
 
-1. Open your source folder in Finder and double-click on **Setup.command** to download binary content for the engine. You can close the Terminal window afterwards.
+# Executar
+adb shell am start -n com.unrealengine.lite/.MainActivity
 
-   If you downloaded the source as a .zip file, you may see a warning about it being from an unidentified developer (because .zip files on GitHub aren't digitally signed).
-   To work around it, right-click on Setup.command, select Open, then click the Open button.
+# Ver logs
+adb logcat | grep UE4
+```
 
-1. In the same folder, double-click **GenerateProjectFiles.command**.  It should take less than a minute to complete.  
+---
 
-1. Load the project into Xcode by double-clicking on the **UE4.xcworkspace** file. Select the **ShaderCompileWorker** for **My Mac** target in the title bar,
-   then select the 'Product > Build' menu item. When Xcode finishes building, do the same for the **UE4** for **My Mac** target. Compiling may take anywhere between 15 and 40 minutes, depending on your system specs.
-   
-1. After compiling finishes, select the 'Product > Run' menu item to load the editor.
+## 📁 Estrutura de Arquivos
 
+```
+UnrealEngine4lite/
+├── ANDROID_LITE_BUILD.md           # Guia de arquitetura e fases
+├── SETUP_CHECKLIST.md              # Checklist completo de setup
+├── README.md                        # Este arquivo
+│
+├── Engine/
+│   ├── Build/Android/
+│   │   ├── setup-android.sh         # Setup NDK/SDK/Gradle
+│   │   ├── build-apk.sh             # Script de build APK
+│   │   ├── build.gradle             # Configuração Gradle
+│   │   ├── local.properties.template # Template de config
+│   │   ├── proguard-rules.pro       # Regras de obfuscação
+│   │   ├── AndroidEngine.ini        # Configuração de renderer
+│   │   ├── disable-expensive-shaders.sh
+│   │   ├── remove-unnecessary-plugins.sh
+│   │   └── README.md                # Docs build system
+│   │
+│   ├── Config/Android/
+│   │   ├── AndroidEngine.ini        # Configuração engine
+│   │   ├── ShaderCompilerConfig.json
+│   │   └── PermutationReduction.json
+│   │
+│   └── Shaders/
+│       ├── Private/
+│       │   └── MobileLiteShaders.usf # Shaders otimizados
+│       └── Definitions/
+│           ├── LiteMobileShaders.h
+│           └── LiteCompilationRules.ush
+│
+├── Scripts/
+│   ├── optimize-assets.py           # Otimizador de assets
+│   └── configure-shader-compiler.py # Configurador de shaders
+│
+└── Build/Output/Android/
+    └── (APKs gerados aqui)
+```
 
+---
 
+## 🛠️ Componentes Principais
 
-### Linux
+### 1. **Build System** (`Engine/Build/Android/`)
 
-1. [Set up Git](https://help.github.com/articles/set-up-git/) and [fork our repository](https://help.github.com/articles/fork-a-repo/).
-   If you'd prefer not to use Git, use the 'Download ZIP' button on the right to get the source as a zip file.
+**Arquivos:**
+- `setup-android.sh`: Configura NDK, SDK, Gradle
+- `build-apk.sh`: Compila APK otimizado
+- `build.gradle`: Configuração Gradle com otimizações
+- `proguard-rules.pro`: Obfuscação e shrinking de código
 
-1. Open your source folder and run **Setup.sh** to download binary content for the engine.
+**Características:**
+- Suporte a arm64-v8a e armeabi-v7a
+- R8 code shrinking automático
+- Compressão de recursos
+- Symbol stripping
 
-1. Both cross-compiling and native builds are supported. 
+### 2. **Shaders Otimizados** (`Engine/Shaders/`)
 
-   **Cross-compiling** is handy when you are a Windows (Mac support planned too) developer who wants to package your game for Linux with minimal hassle, and it requires a [cross-compiler toolchain](http://cdn.unrealengine.com/CrossToolchain_Linux/v11_clang-5.0.0-centos7.zip) to be installed (see the [Linux cross-compiling page on the wiki](https://docs.unrealengine.com/latest/INT/Platforms/Linux/GettingStarted/)).
+**Arquivo Principal:** `MobileLiteShaders.usf`
 
-   **Native compilation** is discussed in [a separate README](Engine/Build/BatchFiles/Linux/README.md) and [community wiki page](https://wiki.unrealengine.com/Building_On_Linux). 
+**Shaders Inclusos:**
+- `LiteUnlitShader`: Sem cálculos de lighting
+- `LiteLowPolyShader`: Lighting simples (1 luz direcional)
+- `Lite2DCanvasShader`: Para UI e elementos 2D
 
+**Otimizações:**
+- Máximo 5 samplers de textura
+- Texture packing (Normal + ARM em canais)
+- Early Z-pass habilitado
+- Forward rendering apenas
 
+### 3. **Configuração de Renderer** (`Engine/Config/Android/`)
 
+**AndroidEngine.ini:**
+- Rendering settings móvel
+- Desabilita: atmospheric fog, sky atmosphere, shadows globais
+- Enable: forward rendering, early Z-pass
+- Limita shadow resolution a 512x512
 
-### Additional target platforms
+### 4. **Asset Optimization** (`Scripts/optimize-assets.py`)
 
-**Android** support will be downloaded by the setup script if you have the Android NDK installed. See the [Android getting started guide](https://docs.unrealengine.com/latest/INT/Platforms/Android/GettingStarted/).
+**Funcionalidades:**
+- Redimensiona texturas para máximo 512x512
+- Compressão PNG/JPEG com qualidade otimizada
+- Suporte para meshes e áudio (framework)
+- Relatório de espaço economizado
 
-**iOS** programming requires a Mac. Instructions are in the [iOS getting started guide](https://docs.unrealengine.com/latest/INT/Platforms/iOS/GettingStarted/index.html).
+---
 
-**HTML5** support will be downloaded by the setup script if you have Emscripten installed. Please see the [HTML5 getting started guide](https://docs.unrealengine.com/latest/INT/Platforms/HTML5/GettingStarted/index.html).
+## 📊 Performance Targets
 
-**PlayStation 4** or **XboxOne** development require additional files that can only be provided after your registered developer status is confirmed by Sony or Microsoft. See [the announcement blog post](https://www.unrealengine.com/blog/playstation-4-and-xbox-one-now-supported) for more information.
+### APK Size
+```
+├── Ideal:   < 80MB (compressed)
+├── Target:  < 100MB (compressed)
+└── Max:     < 150MB (compressed)
+```
 
+### Runtime Performance
+```
+├── FPS:           30-60 (stable)
+├── Memory Peak:   < 512MB
+├── Draw Calls:    < 500/frame
+└── Shader Cost:   Low (minimal instructions)
+```
 
-Licensing and Contributions
----------------------------
+### Device Support
+```
+├── Min API:       21 (Android 5.0)
+├── Target API:    30 (Android 11)
+├── Min RAM:       512MB
+└── Tested RAM:    2GB+
+```
 
-Your access to and use of Unreal Engine on GitHub is governed by the [Unreal Engine End User License Agreement](https://www.unrealengine.com/eula). If you don't agree to those terms, as amended from time to time, you are not permitted to access or use Unreal Engine.
+---
 
-We welcome any contributions to Unreal Engine development through [pull requests](https://github.com/EpicGames/UnrealEngine/pulls/) on GitHub. Most of our active development is in the **master** branch, so we prefer to take pull requests there (particularly for new features). We try to make sure that all new code adheres to the [Epic coding standards](https://docs.unrealengine.com/latest/INT/Programming/Development/CodingStandard/).  All contributions are governed by the terms of the EULA.
+## 🔧 Configuração Avançada
 
+### Customizar Shaders
 
-Additional Notes
-----------------
+Editar `Engine/Shaders/Private/MobileLiteShaders.usf`:
 
-The first time you start the editor from a fresh source build, you may experience long load times. 
-The engine is optimizing content for your platform to the _derived data cache_, and it should only happen once.
+```glsl
+// Adicione novos shaders otimizados
+void CustomLiteShader(/* params */) {
+    // Implementação
+}
+```
 
-Your private forks of the Unreal Engine code are associated with your GitHub account permissions.
-If you unsubscribe or switch GitHub user names, you'll need to re-fork and upload your changes from a local copy. 
+### Ajustar Qualidade de Renderização
 
+Modificar `Engine/Config/Android/AndroidEngine.ini`:
+
+```ini
+[/Script/Engine.RendererSettings]
+r.MaxAnisotropy=2              ; Aumentar para qualidade
+r.Shadow.MaxResolution=512     ; Aumentar resolução de sombras
+r.MobileHDR=False              ; Manter False para performance
+```
+
+### Configurar Assets
+
+Editar `Scripts/optimize-assets.py`:
+
+```python
+DEFAULT_TEXTURE_SIZE = 512  # Aumentar resolução
+DEFAULT_QUALITY = 80        # Aumentar qualidade JPEG
+MAX_POLYGON_COUNT = 50000   # Aumentar complexidade de meshes
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Erro: "NDK not found"
+
+```bash
+export ANDROID_NDK_HOME=/path/to/ndk/r19c
+./Engine/Build/Android/setup-android.sh
+```
+
+### Erro: "Gradle build failed"
+
+```bash
+# Verificar Java version
+java -version  # Deve ser 11+
+
+# Limpar e rebuild
+cd Engine/Build/Android
+./gradlew clean
+./build-apk.sh release arm64-v8a
+```
+
+### Erro: "Shader compilation failed"
+
+```bash
+# Reconfigurar shader compiler
+python3 Scripts/configure-shader-compiler.py $(pwd)
+
+# Regenerar project files
+./GenerateProjectFiles.sh
+```
+
+### Device: "App crashes on startup"
+
+```bash
+# Ver logs detalhados
+adb logcat | grep -i ue4
+adb logcat | grep -i error
+
+# Testar com debug APK
+./Engine/Build/Android/build-apk.sh debug arm64-v8a
+```
+
+---
+
+## 📚 Documentação Adicional
+
+- **[ANDROID_LITE_BUILD.md](ANDROID_LITE_BUILD.md)**: Arquitetura e fases de implementação
+- **[SETUP_CHECKLIST.md](SETUP_CHECKLIST.md)**: Checklist completo de setup
+- **[Engine/Build/Android/README.md](Engine/Build/Android/README.md)**: Build system específico
+
+---
+
+## 📋 Roadmap
+
+### Fase 1: Build System ✅
+- [x] Scripts Android NDK/SDK/Gradle
+- [x] Configuração Gradle
+- [x] Build APK script
+
+### Fase 2: Otimização de Shaders ✅
+- [x] Desabilitar atmospheric fog, sky atmosphere
+- [x] Desabilitar whole scene shadows, stationary skylight
+- [x] Criar shaders móvel otimizados
+
+### Fase 3: Simplificação de Renderer ✅
+- [x] Configuração de renderer móvel
+- [x] Forward rendering apenas
+- [x] Limitar texture samplers a 5
+
+### Fase 4: Otimização de Assets ✅
+- [x] Script de otimização de assets
+- [x] Compressão de texturas
+- [x] Relatório de otimização
+
+### Fase 5: Testes 🔄
+- [ ] Teste em Android 5.0-11.0
+- [ ] Validação de performance
+- [ ] Teste em múltiplos dispositivos
+
+### Fase 6: Documentação 🔄
+- [x] Guia de build
+- [x] Arquitetura do projeto
+- [x] Checklist de setup
+- [ ] Guia de troubleshooting avançado
+
+---
+
+## 🤝 Contribuindo
+
+Pull requests são bem-vindos! Por favor:
+
+1. Fork o repositório
+2. Crie uma branch para sua feature (`git checkout -b feature/melhoria`)
+3. Commit suas mudanças (`git commit -am 'Add melhoria'`)
+4. Push para a branch (`git push origin feature/melhoria`)
+5. Abra um Pull Request
+
+---
+
+## 📄 Licença
+
+Este projeto segue a licença da Unreal Engine (EULA). Veja LICENSE para detalhes.
+
+---
+
+## 📞 Suporte
+
+- **Issues**: Use GitHub Issues para reportar bugs
+- **Discussões**: Use GitHub Discussions para perguntas
+- **Documentação**: Veja os arquivos .md neste repositório
+
+---
+
+## 🎯 Status do Projeto
+
+**Branch**: `android-lite-setup`  
+**Status**: Em Desenvolvimento Ativo  
+**Última Atualização**: 2026-07-03  
+
+```
+[████████████████████████████░░] 90% Completo
+
+✅ Build System completo
+✅ Shaders otimizados
+✅ Renderer simplificado
+✅ Asset optimization
+⏳ Testes em dispositivos reais
+```
+
+---
+
+**Desenvolvido por**: UE4 Lite Team  
+**Baseado em**: Unreal Engine 4.22  
+**Alvo**: Android 5.0+ (API 21+)  
